@@ -12,6 +12,7 @@ function parseArgs(argv) {
     else if (arg === "--retries") args.retries = Number(argv[++i]);
     else if (arg === "--retry-delay") args.retryDelayMs = Number(argv[++i]);
     else if (arg === "--discord-webhook") args.discordWebhook = argv[++i];
+    else if (arg === "--quiet") args.quiet = true;
     else args.targets.push(arg);
   }
   return args;
@@ -97,6 +98,7 @@ async function main() {
     console.log(JSON.stringify(results, null, 2));
   } else {
     for (const r of results) {
+      if (args.quiet && r.up) continue;
       const status = r.up ? `UP (${r.latencyMs}ms)` : "DOWN";
       console.log(`${r.host}:${r.port} — ${status}`);
     }
