@@ -45,5 +45,6 @@ node index.js --config targets.json
 | `--retry-delay <ms>` | Delay between retries | `500` |
 | `--config <file>` | Load targets from a JSON file instead of args | — |
 | `--discord-webhook <url>` | Post an alert to a Discord webhook if any host is down | — |
+| `--quiet` | Only print down hosts in plain-text mode | off |
 
 Exit code is `1` if any target is down, `0` if all are up — handy for chaining in a cron job or CI step.
