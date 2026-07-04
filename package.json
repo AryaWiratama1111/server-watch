@@ -1,0 +1,15 @@
+{
+  "name": "server-watch",
+  "version": "1.0.0",
+  "description": "Simple CLI tool to monitor server/host uptime and latency, with JSON output and Discord webhook alerting.",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "server-watch": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "MIT",
+  "author": "Arya Wiratama"
+}
