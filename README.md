@@ -41,6 +41,8 @@ node index.js --config targets.json
 |---|---|---|
 | `--json` | Output machine-readable JSON instead of plain text | off |
 | `--timeout <ms>` | Connection timeout per host | `3000` |
+| `--retries <n>` | Retry a failed check before reporting it down | `0` |
+| `--retry-delay <ms>` | Delay between retries | `500` |
 | `--config <file>` | Load targets from a JSON file instead of args | — |
 
 Exit code is `1` if any target is down, `0` if all are up — handy for chaining in a cron job or CI step.

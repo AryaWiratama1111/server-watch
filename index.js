@@ -3,15 +3,33 @@ import { Socket } from "node:net";
 import { readFile } from "node:fs/promises";
 
 function parseArgs(argv) {
-  const args = { targets: [], config: null, json: false, timeout: 3000 };
+  const args = { targets: [], config: null, json: false, timeout: 3000, retries: 0, retryDelayMs: 500 };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--config") args.config = argv[++i];
     else if (arg === "--json") args.json = true;
     else if (arg === "--timeout") args.timeout = Number(argv[++i]);
+    else if (arg === "--retries") args.retries = Number(argv[++i]);
+    else if (arg === "--retry-delay") args.retryDelayMs = Number(argv[++i]);
     else args.targets.push(arg);
   }
   return args;
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function checkHostWithRetries(host, port, timeoutMs, retries, retryDelayMs) {
+  let attempt = 0;
+  let result;
+  do {
+    result = await checkHost(host, port, timeoutMs);
+    if (result.up) return result;
+    attempt++;
+    if (attempt <= retries) await delay(retryDelayMs);
+  } while (attempt <= retries);
+  return result;
 }
 
 function checkHost(host, port, timeoutMs) {
@@ -58,7 +76,9 @@ async function main() {
     return;
   }
 
-  const results = await Promise.all(targets.map((t) => checkHost(t.host, t.port, args.timeout)));
+  const results = await Promise.all(
+    targets.map((t) => checkHostWithRetries(t.host, t.port, args.timeout, args.retries, args.retryDelayMs)),
+  );
 
   if (args.json) {
     console.log(JSON.stringify(results, null, 2));
