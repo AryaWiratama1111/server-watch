@@ -11,6 +11,7 @@ function parseArgs(argv) {
     else if (arg === "--timeout") args.timeout = Number(argv[++i]);
     else if (arg === "--retries") args.retries = Number(argv[++i]);
     else if (arg === "--retry-delay") args.retryDelayMs = Number(argv[++i]);
+    else if (arg === "--discord-webhook") args.discordWebhook = argv[++i];
     else args.targets.push(arg);
   }
   return args;
@@ -53,6 +54,18 @@ function checkHost(host, port, timeoutMs) {
   });
 }
 
+async function notifyDiscord(webhookUrl, downHosts) {
+  const content = `🔴 **server-watch alert** — ${downHosts.length} host(s) down:\n${downHosts
+    .map((r) => `• ${r.host}:${r.port}`)
+    .join("\n")}`;
+
+  await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+}
+
 function parseTarget(target) {
   const [host, portStr] = target.split(":");
   return { host, port: Number(portStr) || 443 };
@@ -89,7 +102,12 @@ async function main() {
     }
   }
 
-  process.exitCode = results.some((r) => !r.up) ? 1 : 0;
+  const downHosts = results.filter((r) => !r.up);
+  if (downHosts.length > 0 && args.discordWebhook) {
+    await notifyDiscord(args.discordWebhook, downHosts);
+  }
+
+  process.exitCode = downHosts.length > 0 ? 1 : 0;
 }
 
 main();
